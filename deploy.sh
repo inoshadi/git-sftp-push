@@ -12,8 +12,13 @@ FN_TMP="/tmp/sftpPush.$RANDOM"
 echo '' > $FN_TMP
 $CURRDIR/sftpPush.sh "$FN_GD" "$FN_TMP"
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-sed -r '/^\s*$/d' "$FN_TMP" > $FN_GD
-LIN=`wc -l $FN_GD | cut -f 1 -d " "`
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -E '/^\s*$/d' "$FN_TMP" > $FN_GD
+else
+    sed -r '/^\s*$/d' "$FN_TMP" > $FN_GD
+fi
+
+LIN=`wc -l $FN_GD | awk '{ print $1 }'`
 echo "Provide your sftp password to executing $LIN line(s) of command to: $1"
 echo "or (Ctrl + c) to abort"
 sftp $1 < "$FN_GD"

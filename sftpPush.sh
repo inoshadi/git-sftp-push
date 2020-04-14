@@ -27,34 +27,39 @@ fi
 echo "Staged file(s):"
 cat $FN_GD
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-LIN=`wc -l $FN_GD | cut -f 1 -d " "`
+LIN=`wc -l $FN_GD | awk '{ print $1 }'`
 
 echo "Processing ${LIN} line(s) of $FN_GD....."
 while IFS= read -r FN
 do
   if test -f "${FN}"; then
-    git log --name-only --oneline --follow "$FN" >$FN_TMP2
-    sed -i '1~2d' $FN_TMP2
-    FNB=`sed '2!d' $FN_TMP2`
-    
-    FNA=`sed '1!d' $FN_TMP2`
-    if [ "$FNB" != "" ]; then
-        if [ "$FNB" != "$FNA" ] ; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "put ${FN} ${FN}" >> $FN_TMP
+    else
+        echo $FN
+        git log --name-only --oneline --follow "$FN" >$FN_TMP2
+        sed -i '1~2d' $FN_TMP2
+        FNB=`sed '2!d' $FN_TMP2`
+        
+        FNA=`sed '1!d' $FN_TMP2`
+        if [ "$FNB" != "" ]; then
+            if [ "$FNB" != "$FNA" ] ; then
 
-            if test -f "${FNB}"; then
-                echo "";
-            else
-                echo "File has been renamed from $FNB to $FNA"
-                echo "rm ${FNB}" >> $FN_TMP
-                printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+                if test -f "${FNB}"; then
+                    echo "";
+                else
+                    echo "File has been renamed from $FNB to $FNA"
+                    echo "rm ${FNB}" >> $FN_TMP
+                    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+                fi
+                echo "put ${FNA} ${FNA}" >> $FN_TMP
+                
+            else 
+                echo "put ${FN} ${FN}" >> $FN_TMP
             fi
-            echo "put ${FNA} ${FNA}" >> $FN_TMP
-            
         else 
             echo "put ${FN} ${FN}" >> $FN_TMP
         fi
-    else 
-        echo "put ${FN} ${FN}" >> $FN_TMP
     fi
   else
     echo "File has been deleted: $FN"
