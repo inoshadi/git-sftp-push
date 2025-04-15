@@ -1,5 +1,5 @@
 # git-sftp-push
-Generating modified file list using git diff --name-only in order to put those file(s) using sftp
+Generates staged file list using git diff --name-only to put those files using sftp
 
 - set as executable
 ```
